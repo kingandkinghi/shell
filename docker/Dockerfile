@@ -13,8 +13,9 @@ ARG USER
 USER "${USER}"
 
 ARG TARBALL
-ADD "${TARBALL}" /workspaces/fidalgo-dev/
+ARG REPO_NAME
+ADD "${TARBALL}" /workspaces/${REPO_NAME}/
 RUN --security=insecure \
     GITHUB_USER=fidalgotesting \
-        bash -c ". /workspaces/fidalgo-dev/prebuild.sh"
+        bash -c ". /workspaces/${REPO_NAME}/prebuild.sh"
 RUN sudo rm -f -r /workspaces/

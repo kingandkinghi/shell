@@ -115,11 +115,6 @@ readonly NIX_AZURE_TOKEN_CACHE_FILE='msal_token_cache.json'
 readonly NIX_AZURE_PROFILE_FILE='azureProfile.json'
 readonly NIX_AZURE_TOKEN_CACHE="${NIX_AZURE_DIR}/${NIX_AZURE_TOKEN_CACHE_FILE}"
 
-# CPC bugs
-readonly NIX_WWW_CPC_BUG_INTEGRATION="https://aka.ms/devdivcpcintegrationbug"
-readonly NIX_WWW_CPC_BUG="https://aka.ms/devdivcpcbug"
-readonly NIX_WWW_CPC_FEATURE="https://aka.ms/fidalgow365featurerequest"
-
 # dependencies
 readonly NIX_DEPENDENCY_DEB=(
     https://packages.microsoft.com/config/ubuntu/21.04/packages-microsoft-prod.deb

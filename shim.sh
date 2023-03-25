@@ -1,11 +1,11 @@
 nix::shim::load() {
     local EXIT_REMAIN=101
     (
-        readonly NIX_HOST_ROOT_DIR="$(cd "$(dirname ${BASH_SOURCE})/.."; pwd)"
+        declare -xr NIX_REPO_DIR="$(cd "$(dirname ${BASH_SOURCE})"; pwd)"
+        declare -xr NIX_HOST_ROOT_DIR="$(dirname ${NIX_REPO_DIR})"
 
         declare -xr NIX_EXIT_REMAIN="${EXIT_REMAIN}"
         declare -xr NIX_ROOT_DIR="/workspaces"
-        declare -xr NIX_REPO_DIR="${NIX_HOST_ROOT_DIR}/fidalgo-dev"
         declare -xr NIX_DIR="${NIX_REPO_DIR}/nix"
         declare -xr NIX_LOADER="${NIX_DIR}/loader.sh"
         declare -xr NIX_DIR_NIX_USR="${NIX_DIR}/usr"
@@ -32,7 +32,7 @@ nix::shim::load() {
         return
     fi
 
-    exit "${EXIT_CODE}"
+    # exit "${EXIT_CODE}"
 }
 
 nix::shim::load "$@"

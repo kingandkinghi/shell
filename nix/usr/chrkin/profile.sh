@@ -234,7 +234,7 @@ nix::record::diff() {
 # >         --resource-group ${NIX_FID_RESOURCE_GROUP} \
 # >         --subscription ${NIX_FID_SUBSCRIPTION}
 # Command group 'devcenter' is experimental and under development. Reference and support levels: 
-https://aka.ms/CLI_refstatus
+# https://aka.ms/CLI_refstatus
 # (InvalidRequestContent) The request content was invalid and could not be deserialized: 
 # 'Unable to find a constructor to use for type Microsoft.Azure.OpenApi.Validation.Models.OperationInfo. 
 # A class should either have a default constructor, one constructor with arguments or a constructor marked 

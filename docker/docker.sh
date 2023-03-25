@@ -5,22 +5,23 @@ alias fd-docker-buildx="nix::docker::buildx::build"
 alias fd-docker-hub-login="nix::docker::hub::login"
 alias fd-docker-hub-publish="nix::docker::hub::publish"
 
-# https://hub.docker.com/repository/docker/fidalgotesting
+# https://hub.docker.com/repositories/kingandkingesq
 # https://github.com/microsoft/vscode-dev-containers/blob/main/script-library/docs/docker-in-docker.md
 # https://superuser.com/questions/1401919/cannot-start-docker-when-using-chroot
 
-declare NIX_DOCKERHUB_USER='fidalgotesting'
-declare NIX_DOCKERHUB_PASSWORD="${NIX_CODESPACE_SECRET_AZURE_PASSWORD}"
+declare NIX_DOCKERHUB_USER='kingandkingesq'
+declare NIX_DOCKERHUB_PASSWORD="${NIX_CODESPACE_SECRET_DOCKERHUB_PASSWORD}"
 
 declare NIX_DOCKER_BUILDX_INSTANCE=insecure-builder
 
+declare NIX_DOCKER_REPO_NAME='shell'
 declare NIX_DOCKER_USER='vscode'
 declare NIX_DOCKER_PREBUILD_VARIANT='jammy'
 declare NIX_DOCKER_PREBUILD_IMAGE='mcr.microsoft.com/vscode/devcontainers/base:0'
 declare NIX_DOCKER_PREBUILD_TOOLS='debootstrap'
 declare NIX_DOCKER_CHROOT_SUITE='focal'
 declare NIX_DOCKER_CHROOT_TAG='devcontainer'
-declare NIX_DOCKER_CHROOT_VERSION='v0.0.8'
+declare NIX_DOCKER_CHROOT_VERSION='v0.0.1'
 declare NIX_DOCKER_CHROOT_FULLNAME="${NIX_DOCKERHUB_USER}/${NIX_DOCKER_CHROOT_TAG}:${NIX_DOCKER_CHROOT_VERSION}"
 
 nix::docker::main() {
@@ -54,14 +55,14 @@ nix::docker::buildx::instance::remove() {
 }
 
 nix::docker::buildx::tar() {
-    local TARBALL=fidalgo-dev.tar.gz
+    local TARBALL="${NIX_DOCKER_REPO_NAME}.tar.gz"
 
     if [[ -f "${TARBALL}" ]]; then
         sudo rm "${TARBALL}"
     fi
 
     tar \
-        -C '/workspaces/fidalgo-dev/' \
+        -C "/workspaces/${NIX_DOCKER_REPO_NAME}/" \
         -cf "/tmp/${TARBALL}" \
         . \
         >/dev/null 
@@ -70,7 +71,7 @@ nix::docker::buildx::tar() {
 }
 
 nix::docker::buildx::build() {
-    local TARBALL=fidalgo-dev.tar.gz
+    local TARBALL="${NIX_DOCKER_REPO_NAME}.tar.gz"
 
     nix::docker::buildx::instance::create
 
@@ -82,6 +83,7 @@ nix::docker::buildx::build() {
 
     docker buildx build --allow security.insecure . \
         --progress=plain \
+        --build-arg REPO_NAME="${NIX_DOCKER_REPO_NAME}" \
         --build-arg VARIANT="${NIX_DOCKER_PREBUILD_VARIANT}" \
         --build-arg IMAGE="${NIX_DOCKER_PREBUILD_IMAGE}" \
         --build-arg TOOLS="${NIX_DOCKER_PREBUILD_TOOLS}" \

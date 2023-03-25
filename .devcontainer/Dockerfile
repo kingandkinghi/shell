@@ -1,1 +1,1 @@
-FROM fidalgotesting/devcontainer:v0.0.7
+FROM kingandkingesq/devcontainer:v0.0.1

@@ -1,3 +1,0 @@
-nominate dev-center owner fidalgo
-option catalog-item-name DeployKeyVault
-option deployment-parameters '{ "keyVaultNamePrefix": { "value": "my-prefix" } }'

@@ -29,7 +29,7 @@ nix::shim::main() {
 
     local EXIT_CODE
     while true; do
-        nix::shim::chroot::main "${ALIAS}" "$@"
+        nix::chroot::main "${ALIAS}" "$@"
         EXIT_CODE=$?
 
         if (( EXIT_CODE == NIX_EXIT_RELOAD )); then
@@ -63,28 +63,6 @@ nix::shim::install_github_cli() (
     sudo apt install gh    
 )
 
-nix::shim::chroot::main() (
-    : "${NIX_CHROOT_DIR?}"
-    
-    local ALIAS="$1"
-    shift
-
-    nix::chroot::mount
-    trap "nix::chroot::umount" EXIT 
-
-    local CMD=(
-        'sudo' 'chroot' "${NIX_CHROOT_DIR}" 'su' '--login' "${ALIAS}"
-    )
-
-    # automated
-    if (( $# > 0 )); then
-        "${CMD[@]}" < <(echo "$@")
-        return $?
-    fi
-
-    "${CMD[@]}"
-)
-
 nix::shim::debootstrap::initialize() {
 
     # download
@@ -100,7 +78,7 @@ nix::shim::debootstrap::initialize() {
     )
 }
 
-nix::shim::export::emit() (
+nix::shim::export::emit() {
 
     declare -p \
         | grep NIX \
@@ -109,7 +87,7 @@ nix::shim::export::emit() (
         | sed 's/-rx/-r/g' \
         | sed 's/-x/-r/g' \
         | sed "s+${NIX_HOST_ROOT_DIR}+${NIX_ROOT_DIR}+g"
-)
+}
 
 nix::shim::chroot::user::add() (
     local ALIAS="$1"

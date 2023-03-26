@@ -1,3 +1,25 @@
+nix::chroot::main() (
+    : "${NIX_CHROOT_DIR?}"
+    
+    local ALIAS="$1"
+    shift
+
+    nix::chroot::mount
+    trap "nix::chroot::umount" EXIT 
+
+    local CMD=(
+        'sudo' 'chroot' "${NIX_CHROOT_DIR}" 'su' '--login' "${ALIAS}"
+    )
+
+    # automated
+    if (( $# > 0 )); then
+        "${CMD[@]}" < <(echo "$@")
+        return $?
+    fi
+
+    "${CMD[@]}"
+)
+
 nix::chroot::test() {
     : "${NIX_CHROOT_DIR?}"
     
@@ -50,20 +72,27 @@ nix::chroot::initialize() {
             nix::log::subproc::begin 'nix: shim: chroot: cloning'
             sudo cp -pr "${UNPACKED}" "${NIX_CHROOT_DIR}"
         )
-
-        # initialize chroot
-        (
-            nix::log::subproc::begin 'nix: shim: chroot: initializing'
-            nix::chroot::initialize::locale
-            nix::chroot::initialize::nix
-            nix::chroot::initialize::bash_login
-        )
     fi
+
+    # initialize chroot
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: initializing locale'
+        nix::chroot::initialize::locale
+    )
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: exporting environment'
+        nix::chroot::initialize::nix
+    )
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: update user skeleton'
+        nix::chroot::initialize::bash_login
+    )
 
     # computer name changes so we cannot burn this initialization into the image
-    if ! nix::chroot::initialize::loopback::test; then
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: update loopback'
         nix::chroot::initialize::loopback
-    fi
+    )
 }
 
 nix::chroot::remove() (
@@ -83,9 +112,18 @@ nix::chroot::remove() (
     nix::chroot::remove
 )
 
+nix::chroot::eval() {
+    : "${NIX_CHROOT_DIR?}"
+    sudo chroot "${NIX_CHROOT_DIR}" "$@"
+}
+
 nix::chroot::initialize::loopback::test() {
     : "${NIX_CHROOT_DIR?}"
     
+    if nix::chroot::initialize::loopback::test; then
+        return
+    fi
+
     cat "${NIX_CHROOT_ETC_HOSTS}" \
         | grep "${HOSTNAME}" \
         >/dev/null 2>&1
@@ -96,7 +134,7 @@ nix::chroot::initialize::loopback() {
     
     # fix: sudo: unable to resolve host codespaces-02adf7: Name or service not known
     # loopback networking chroot setup
-    echo "127.0.0.1 $HOSTNAME" \
+    echo "127.0.0.1 ${HOSTNAME}" \
         | sudo tee -a "${NIX_CHROOT_ETC_HOSTS}" \
         >/dev/null
 }
@@ -104,18 +142,8 @@ nix::chroot::initialize::loopback() {
 nix::chroot::initialize::locale() {
     : "${NIX_CHROOT_DIR?}"
     
-    # enable en
-    cat "${NIX_CHROOT_ETC_LOCALE_GEN}" \
-        | sed 's/# en_US.UTF-8/en_US.UTF-8/g' \
-        | sudo tee "${NIX_CHROOT_ETC_LOCALE_GEN}" \
-        >/dev/null
-    sudo cp "${NIX_CHROOT_DIR}/tmp/locale.gen" "${NIX_CHROOT_ETC_LOCALE_GEN}"
-
-    (
-        nix::chroot::mount
-        trap nix::chroot::umount EXIT 
-        sudo chroot "${NIX_CHROOT_DIR}" locale-gen
-    )
+    nix::chroot::eval locale-gen "${NIX_CHROOT_ETC_LOCALE}" > /dev/null
+    nix::chroot::eval update-locale LANG="${NIX_CHROOT_ETC_LOCALE}" > /dev/null
 }
 
 nix::chroot::initialize::nix() (
@@ -138,12 +166,10 @@ nix::chroot::initialize::bash_login() {
 }
 
 nix::chroot::user::test() {
-    : "${NIX_CHROOT_DIR?}"
-    
     local ALIAS="$1"
     shift
 
-    sudo test -f "${NIX_CHROOT_ETC_SUDOERS_DIR}/${ALIAS}"
+    nix::chroot::eval id "$ALIAS" >/dev/null 2>&1
 }
 
 nix::chroot::user::add() {
@@ -157,7 +183,7 @@ nix::chroot::user::add() {
     fi
 
     # create user
-    sudo chroot "${NIX_CHROOT_DIR}" adduser --disabled-password --gecos "" "${ALIAS}"
+    nix::chroot::eval adduser --disabled-password --gecos "" "${ALIAS}"
 
     # password-less sudo
     echo "${ALIAS} ALL=(root) NOPASSWD:ALL" \

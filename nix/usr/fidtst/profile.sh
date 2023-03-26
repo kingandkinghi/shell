@@ -8,6 +8,6 @@ readonly NIX_MY_ENVIRONMENTS=(
     INT
     PPE
 )
-readonly NIX_MY_DEFAULT_PROFILE=administrator
-readonly NIX_MY_DEFAULT_ENVIRONMENT=PPE
+# readonly NIX_MY_DEFAULT_PROFILE=administrator
+# readonly NIX_MY_DEFAULT_ENVIRONMENT=PPE
 source "${NIX_DIR_NIX_USR}/alias.sh"

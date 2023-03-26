@@ -16,9 +16,6 @@ alias pd-dp="nix::shell::pushd ${NIX_REPO_DIR}/http/dataplane"
 
 alias pd-swag-rm="nix::shell::pushd ${NIX_REPO_DIR_SRC}/sdk/specification/devtestcenter/resource-manager/Microsoft.Devcenter/preview"
 
-# projects/aadj-project-df/users/me/virtualmachines/aadj-vm0-df
-alias aadj-curl="nix::dataplane::vm::put aadj-project-df aadj-pool aadj-vm0-df"
-
 alias who="fd-who"
 alias dp="nix::bash::dump::declarations"
 

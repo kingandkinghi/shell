@@ -24,7 +24,7 @@ nix::shim::main() {
     fi
 
     # initialize chroot
-    nix::chroot::initialize "${UNPACKED}"
+    nix::shim::chroot::initialize "${UNPACKED}"
     nix::shim::chroot::user::add "${ALIAS}"
 
     local EXIT_CODE
@@ -38,7 +38,7 @@ nix::shim::main() {
 
         if (( EXIT_CODE == NIX_EXIT_CHROOT_REINITIALIZE )); then
             nix::chroot::remove
-            nix::chroot::initialize "${UNPACKED}"
+            nix::shim::chroot::initialize "${UNPACKED}"
             nix::shim::chroot::user::add "${ALIAS}"
             continue
         fi
@@ -52,6 +52,41 @@ nix::shim::main() {
     done
 
     return "${EXIT_CODE}"
+}
+
+nix::shim::chroot::initialize() {
+    : "${NIX_CHROOT_DIR?}"
+    
+    local UNPACKED="$1"
+    shift
+
+    if ! nix::chroot::test; then
+        # clone unpacked deboostrap
+        (
+            nix::log::subproc::begin 'nix: shim: chroot: cloning'
+            sudo cp -pr "${UNPACKED}" "${NIX_CHROOT_DIR}"
+        )
+    fi
+
+    # initialize chroot
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: initializing locale'
+        nix::chroot::initialize::locale
+    )
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: exporting environment'
+        nix::chroot::initialize::nix
+    )
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: update user skeleton'
+        nix::chroot::initialize::bash_login
+    )
+
+    # computer name changes so we cannot burn this initialization into the image
+    (
+        nix::log::subproc::begin 'nix: shim: chroot: update loopback'
+        nix::chroot::initialize::loopback
+    )
 }
 
 nix::shim::install_github_cli() (

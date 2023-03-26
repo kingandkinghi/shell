@@ -17,5 +17,5 @@ ARG REPO_NAME
 ADD "${TARBALL}" /workspaces/${REPO_NAME}/
 RUN --security=insecure \
     GITHUB_USER=kingces95 \
-        bash -c ". /workspaces/${REPO_NAME}/prebuild.sh"
+        bash -c ". /workspaces/${REPO_NAME}/shim.sh nix::tool::install::all"
 RUN sudo rm -f -r /workspaces/

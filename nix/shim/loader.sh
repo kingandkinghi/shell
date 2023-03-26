@@ -9,6 +9,10 @@ nix::shim::loader() {
     while read; do source "${REPLY}"; done \
         < <(find "${NIX_DIR_NIX_SRC}" -type f -name "*.sh")
 
+    if [[ "${GITHUB_USER}" == "${NIX_USR_PREBUILD}" ]]; then
+        return
+    fi
+
     nix::shim::main "$@"
 
     local EXIT_CODE=$?

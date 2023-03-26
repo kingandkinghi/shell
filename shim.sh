@@ -8,7 +8,9 @@
     declare -rx NIX_DIR_NIX_SRC="${NIX_DIR}/src"
     declare -rx NIX_DIR_NIX_SHIM="${NIX_DIR}/shim"
     declare -rx NIX_DIR_NIX_SHIM_SRC="${NIX_DIR_NIX_SHIM}/src"
+    declare -rx NIX_DIR_NIX_SHIM_SRC_DOCKER="${NIX_DIR_NIX_SHIM_SRC}/docker"
     declare -rx NIX_LOADER="${NIX_DIR}/loader.sh"
+    declare -rx NIX_USR_PREBUILD="prebuild"
 
     if [[ "$@" ]]; then
         . "${NIX_DIR_NIX_SHIM}/loader.sh" "$@"

@@ -57,5 +57,6 @@ nix::docker::buildx::build() {
         --build-arg USER="${NIX_DOCKER_USER}" \
         --build-arg TARBALL="${TARBALL}" \
         --tag "${NIX_DOCKER_CHROOT_FULLNAME}" \
-        --output "type=docker"
+        --output "type=docker" \
+        --file "${NIX_DIR_NIX_SHIM_SRC_DOCKER}/Dockerfile"
 }

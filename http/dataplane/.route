@@ -1,4 +1,0 @@
-header  accept: */*
-port    5000
-host    devCenterName.devcenters.fidalgo.azure-test.net
-scheme  https://
